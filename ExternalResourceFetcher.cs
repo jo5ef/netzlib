@@ -7,6 +7,7 @@ using System.IO.Compression;
 using System.IO;
 using System.Web;
 using System.Web.Caching;
+using System.Threading;
 
 namespace PimpMyWeb
 {
@@ -23,8 +24,11 @@ namespace PimpMyWeb
 			if (resource != null)
 			{
 				var wr = WebRequest.Create(resource.Uri);
-				wr.BeginGetResponse(new AsyncCallback(ResponseCallback),
-					new RequestState { Request = wr, Resource = resource });
+				var rs = new RequestState { Request = wr, Resource = resource };
+				var ar = wr.BeginGetResponse(new AsyncCallback(ResponseCallback), rs);
+				
+				ThreadPool.RegisterWaitForSingleObject(ar.AsyncWaitHandle, TimeoutCallback,
+					rs, Settings.Default.ExternalResourceTimeout * 1000, true);
 			}
 		}
 
@@ -55,10 +59,27 @@ namespace PimpMyWeb
 			finally
 			{
 				rs.Resource.Loaded.Set();
-
-				HttpRuntime.Cache.Add(Guid.NewGuid().ToString(), rs.Resource, null,
-					DateTime.Now.AddMinutes(1), Cache.NoSlidingExpiration, CacheItemPriority.Default, Refetch);
+				CacheRefetchItem(rs.Resource);
 			}
+		}
+
+		private static void TimeoutCallback(object state, bool timedOut)
+		{
+			if (timedOut)
+			{
+				var rs = state as RequestState;
+				rs.Request.Abort();
+				rs.Resource.Content = string.Format("// {0}: timed out", rs.Resource.Uri);
+				rs.Resource.Loaded.Set();
+				CacheRefetchItem(rs.Resource);
+			}
+		}
+
+		private static void CacheRefetchItem(ExternalResource resource)
+		{
+			HttpRuntime.Cache.Add(Guid.NewGuid().ToString(), resource, null,
+				DateTime.Now.AddSeconds(Settings.Default.ExternalResourceRefreshInterval),
+				Cache.NoSlidingExpiration, CacheItemPriority.Default, Refetch);
 		}
 
 		private static void Refetch(string key, object value, CacheItemRemovedReason reason)

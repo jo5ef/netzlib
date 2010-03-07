@@ -44,7 +44,7 @@ namespace PimpMyWeb
 						(r as ExternalResource).Loaded.Wait();
 					}
 
-					sb.Append(r.Content);
+					sb.AppendLine(r.Content);
 				}
 				return sb.ToString();
 			}
