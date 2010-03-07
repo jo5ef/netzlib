@@ -76,5 +76,14 @@ namespace PimpMyWeb {
                 return ((int)(this["ExternalResourceTimeout"]));
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("86400")]
+        public int CombinedScriptCacheDuration {
+            get {
+                return ((int)(this["CombinedScriptCacheDuration"]));
+            }
+        }
     }
 }
