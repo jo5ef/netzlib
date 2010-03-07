@@ -12,10 +12,20 @@ namespace PimpMyWeb.Javascript
 	/// </summary>
 	public class ScriptTagFilter : Stream
 	{
-		private readonly Regex scriptPattern;
-		private readonly Regex externalScriptPattern;
-		private readonly Regex excludePattern;
-		private readonly string combinedScriptHtml;
+		private static readonly Regex scriptPattern;
+		private static readonly Regex externalScriptPattern;
+		private static readonly Regex excludePattern;
+		private static readonly string combinedScriptHtml;
+
+		static ScriptTagFilter()
+		{
+			var settings = Settings.Default;
+			var patternOptions = RegexOptions.IgnoreCase | RegexOptions.Compiled;
+			scriptPattern = new Regex(settings.ScriptPattern, patternOptions);
+			externalScriptPattern = new Regex(settings.ExternalScriptPattern, patternOptions);
+			excludePattern = new Regex(settings.ExcludeScriptPattern, patternOptions);
+			combinedScriptHtml = settings.CombinedScriptHtml;
+		}
 
 		private readonly ICombinator combinator;
 
@@ -29,21 +39,13 @@ namespace PimpMyWeb.Javascript
 				HttpContext.Current.Response.Filter,
 				HttpContext.Current.Response.ContentEncoding,
 				HttpContext.Current.Request.Url,
-				Settings.Default,
 				new Combinator()) { }
 
-		public ScriptTagFilter(Stream stream, Encoding encoding, Uri baseUri, Settings settings, ICombinator combinator)
+		public ScriptTagFilter(Stream stream, Encoding encoding, Uri baseUri, ICombinator combinator)
 		{
 			this.writer = new StreamWriter(stream, encoding);
 			this.encoding = encoding;
 			this.baseUri = baseUri;
-
-			var patternOptions = RegexOptions.IgnoreCase | RegexOptions.Compiled;
-			this.scriptPattern = new Regex(settings.ScriptPattern, patternOptions);
-			this.externalScriptPattern = new Regex(settings.ExternalScriptPattern, patternOptions);
-			this.excludePattern = new Regex(settings.ExcludeScriptPattern, patternOptions);
-			this.combinedScriptHtml = settings.CombinedScriptHtml;
-
 			this.combinator = combinator;
 		}
 

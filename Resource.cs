@@ -18,7 +18,7 @@ namespace PimpMyWeb
 
 	internal class ExternalResource : Resource
 	{
-		public ManualResetEventSlim Loaded = new ManualResetEventSlim();
+		public ManualResetEvent Loaded = new ManualResetEvent(false);
 		
 		public Uri Uri { get; set; }
 
@@ -41,7 +41,7 @@ namespace PimpMyWeb
 				{
 					if (r is ExternalResource)
 					{
-						(r as ExternalResource).Loaded.Wait();
+						(r as ExternalResource).Loaded.WaitOne();
 					}
 
 					sb.AppendLine(r.Content);
