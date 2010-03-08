@@ -32,6 +32,8 @@ namespace PimpMyWeb
 	{
 		public Resource[] Resources { get; set; }
 
+		public ContentFilter Filter { get; set; }
+
 		public override string Content
 		{
 			get
@@ -46,7 +48,15 @@ namespace PimpMyWeb
 
 					sb.AppendLine(r.Content);
 				}
-				return sb.ToString();
+
+				var content = sb.ToString();
+
+				if (Filter != null)
+				{
+					content = Filter(content);
+				}
+
+				return content;
 			}
 			set
 			{

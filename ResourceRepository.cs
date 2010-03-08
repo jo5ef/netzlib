@@ -10,9 +10,11 @@ namespace PimpMyWeb
 	{
 		void Add(Uri resource);
 		void Add(string resource);
-		void Add(int key, int[] resources);
+		void Add(int key, int[] resources, ContentFilter filter);
 		string GetContent(int key);
 	}
+
+	internal delegate string ContentFilter(string content);
 
 	internal class ResourceRepository : IResourceRepository
 	{
@@ -79,7 +81,7 @@ namespace PimpMyWeb
 			}
 		}
 
-		public void Add(int key, int[] resourceList)
+		public void Add(int key, int[] resourceList, ContentFilter filter)
 		{
 			locks.EnterUpgradeableReadLock();
 			try
@@ -102,7 +104,7 @@ namespace PimpMyWeb
 							l.Add(resources[resourceKey]);
 						}
 
-						resources.Add(key, new CompositeResource { Resources = l.ToArray() });
+						resources.Add(key, new CompositeResource { Resources = l.ToArray(), Filter = filter });
 					}
 					finally
 					{
@@ -121,8 +123,7 @@ namespace PimpMyWeb
 			locks.EnterReadLock();
 			try
 			{
-				var resource = resources[key];
-				return resource == null ? null : resource.Content;
+				return resources.ContainsKey(key) ? resources[key].Content : null;
 			}
 			finally
 			{

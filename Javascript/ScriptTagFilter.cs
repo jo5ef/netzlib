@@ -27,7 +27,7 @@ namespace PimpMyWeb.Javascript
 			combinedScriptHtml = settings.CombinedScriptHtml;
 		}
 
-		private readonly ICombinator combinator;
+		private readonly IScriptCombinator combinator;
 
 		private readonly Uri baseUri;
 		private readonly StreamWriter writer;
@@ -39,9 +39,9 @@ namespace PimpMyWeb.Javascript
 				HttpContext.Current.Response.Filter,
 				HttpContext.Current.Response.ContentEncoding,
 				HttpContext.Current.Request.Url,
-				new Combinator()) { }
+				new ScriptCombinator()) { }
 
-		public ScriptTagFilter(Stream stream, Encoding encoding, Uri baseUri, ICombinator combinator)
+		public ScriptTagFilter(Stream stream, Encoding encoding, Uri baseUri, IScriptCombinator combinator)
 		{
 			this.writer = new StreamWriter(stream, encoding);
 			this.encoding = encoding;

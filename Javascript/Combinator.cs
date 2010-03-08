@@ -2,17 +2,18 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Yahoo.Yui.Compressor;
 
 namespace PimpMyWeb.Javascript
 {
-	public interface ICombinator
+	public interface IScriptCombinator
 	{
 		void Add(Uri script);
 		void Add(string script);
 		int? Combine();
 	}
 
-	internal class Combinator : ICombinator
+	internal class ScriptCombinator : IScriptCombinator
 	{
 		IResourceRepository repository = ResourceRepository.Current;
 		int hash;
@@ -39,7 +40,8 @@ namespace PimpMyWeb.Javascript
 				return null;
 			}
 
-			repository.Add(hash, scripts.ToArray());
+			repository.Add(hash, scripts.ToArray(),
+				JavaScriptCompressor.Compress);
 			return hash;
 		}
 	}

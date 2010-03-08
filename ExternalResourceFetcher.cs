@@ -77,9 +77,12 @@ namespace PimpMyWeb
 
 		private static void CacheRefetchItem(ExternalResource resource)
 		{
-			HttpRuntime.Cache.Add(Guid.NewGuid().ToString(), resource, null,
-				DateTime.Now.AddSeconds(Settings.Default.ExternalResourceRefreshInterval),
-				Cache.NoSlidingExpiration, CacheItemPriority.Default, Refetch);
+			if (Settings.Default.ExternalResourceRefreshInterval > 0)
+			{
+				HttpRuntime.Cache.Add(Guid.NewGuid().ToString(), resource, null,
+					DateTime.Now.AddSeconds(Settings.Default.ExternalResourceRefreshInterval),
+					Cache.NoSlidingExpiration, CacheItemPriority.Default, Refetch);
+			}
 		}
 
 		private static void Refetch(string key, object value, CacheItemRemovedReason reason)
