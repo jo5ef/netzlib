@@ -43,7 +43,7 @@ namespace PimpMyWeb {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("class=\"exclude\"")]
+        [global::System.Configuration.DefaultSettingValueAttribute(" class=\"exclude\"")]
         public string ExcludeScriptPattern {
             get {
                 return ((string)(this["ExcludeScriptPattern"]));
