@@ -44,6 +44,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ExternalResourceFetcher.cs" />
+    <Compile Include="PimpMyWebModule.cs" />
     <Compile Include="ResourceRepository.cs" />
     <Compile Include="Javascript\Combinator.cs" />
     <Compile Include="Javascript\ScriptHandler.cs" />
