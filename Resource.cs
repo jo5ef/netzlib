@@ -3,29 +3,43 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using System.IO;
 
 namespace PimpMyWeb
 {
 	internal class Resource
 	{
 		public virtual string Content { get; set; }
+		public virtual int Key { get { return Content.GetHashCode(); } }
 
 		public override int GetHashCode()
 		{
-			return Content.GetHashCode();
+			return base.GetHashCode();
 		}
 	}
 
-	internal class ExternalResource : Resource
+	internal abstract class ExternalResource : Resource
 	{
-		public ManualResetEvent Loaded = new ManualResetEvent(false);
-		
-		public Uri Uri { get; set; }
+		public readonly ManualResetEvent Loaded = new ManualResetEvent(false);
+	}
 
-		public override int GetHashCode()
+	internal class LocalResource : ExternalResource
+	{
+		private readonly int key;
+
+		public LocalResource(int key)
 		{
-			return Uri.GetHashCode();
+			this.key = key;
 		}
+
+		public FileInfo File { get; set; }
+		public override int Key { get { return key; } }
+	}
+
+	internal class RemoteResource : ExternalResource
+	{
+		public Uri Uri { get; set; }
+		public override int Key { get { return Uri.GetHashCode(); } }
 	}
 
 	internal class CompositeResource : Resource
@@ -64,14 +78,17 @@ namespace PimpMyWeb
 			}
 		}
 
-		public override int GetHashCode()
+		public override int Key
 		{
-			int hash = 0;
-			foreach (var r in Resources)
+			get
 			{
-				hash ^= r.GetHashCode();
+				int key = 0;
+				foreach (var r in Resources)
+				{
+					key ^= r.Key;
+				}
+				return key;
 			}
-			return hash;
 		}
 	}
 }

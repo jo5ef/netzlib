@@ -85,5 +85,14 @@ namespace PimpMyWeb {
                 return ((int)(this["CombinedScriptCacheDuration"]));
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool WatchFiles {
+            get {
+                return ((bool)(this["WatchFiles"]));
+            }
+        }
     }
 }

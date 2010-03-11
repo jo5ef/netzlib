@@ -43,6 +43,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Extensions.cs" />
     <Compile Include="ExternalResourceFetcher.cs" />
     <Compile Include="PimpMyWebModule.cs" />
     <Compile Include="ResourceRepository.cs" />

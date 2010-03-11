@@ -13,20 +13,98 @@ namespace PimpMyWeb
 {
 	internal class ExternalResourceFetcher
 	{
+		public static readonly ExternalResourceFetcher Current = new ExternalResourceFetcher();
+
+		private ExternalResourceFetcher()
+		{
+		}
+
+		public void Fetch(ExternalResource resource)
+		{
+			if (resource is LocalResource)
+			{
+				Fetch(resource as LocalResource);
+			}
+			else if (resource is RemoteResource)
+			{
+				Fetch(resource as RemoteResource);
+			}
+			else
+			{
+				throw new NotImplementedException();
+			}
+		}
+
+		#region local fetch
+
+		class WatchedDirectory
+		{
+			public FileSystemWatcher Watcher { get; set; }
+			public readonly Dictionary<string, LocalResource> Resources = new Dictionary<string, LocalResource>();
+		}
+
+		private Dictionary<string, WatchedDirectory> directories = new Dictionary<string, WatchedDirectory>();
+
+		public void Fetch(LocalResource resource)
+		{
+			resource.Content = File.ReadAllText(resource.File.FullName);
+			resource.Loaded.Set();
+
+			if (Settings.Default.WatchFiles)
+			{
+				// setup file watch
+
+				if (!directories.ContainsKey(resource.File.DirectoryName))
+				{
+					var fsw = new FileSystemWatcher(resource.File.DirectoryName);
+					fsw.NotifyFilter = NotifyFilters.LastWrite;
+					fsw.Changed += new FileSystemEventHandler(OnFileChanged);
+					directories.Add(resource.File.DirectoryName, new WatchedDirectory { Watcher = fsw });
+				}
+
+				var dir = directories[resource.File.DirectoryName];
+				if (!dir.Resources.ContainsKey(resource.File.Name))
+				{
+					dir.Resources.Add(resource.File.Name, resource);
+					dir.Watcher.EnableRaisingEvents = true;
+				}
+			}
+		}
+
+		private void OnFileChanged(object sender, FileSystemEventArgs e)
+		{
+			if (e.ChangeType == WatcherChangeTypes.Changed)
+			{
+				var file = new FileInfo(e.FullPath);
+				if (directories.ContainsKey(file.DirectoryName))
+				{
+					var dir = directories[file.DirectoryName];
+					if (dir.Resources.ContainsKey(file.Name))
+					{
+						dir.Resources[file.Name].Fetch();
+					}
+				}
+			}
+		}
+
+		#endregion
+
+		#region remote fetch
+
 		class RequestState
 		{
 			public WebRequest Request { get; set; }
-			public ExternalResource Resource { get; set; }
+			public RemoteResource Resource { get; set; }
 		}
 
-		public static void Fetch(ExternalResource resource)
+		public void Fetch(RemoteResource resource)
 		{
 			if (resource != null)
 			{
 				var wr = WebRequest.Create(resource.Uri);
 				var rs = new RequestState { Request = wr, Resource = resource };
 				var ar = wr.BeginGetResponse(new AsyncCallback(ResponseCallback), rs);
-				
+ 
 				ThreadPool.RegisterWaitForSingleObject(ar.AsyncWaitHandle, TimeoutCallback,
 					rs, Settings.Default.ExternalResourceTimeout * 1000, true);
 			}
@@ -75,7 +153,7 @@ namespace PimpMyWeb
 			}
 		}
 
-		private static void CacheRefetchItem(ExternalResource resource)
+		private static void CacheRefetchItem(RemoteResource resource)
 		{
 			if (Settings.Default.ExternalResourceRefreshInterval > 0)
 			{
@@ -87,7 +165,9 @@ namespace PimpMyWeb
 
 		private static void Refetch(string key, object value, CacheItemRemovedReason reason)
 		{
-			Fetch(value as ExternalResource);
+			(value as RemoteResource).Fetch();
 		}
+
+		#endregion
 	}
 }

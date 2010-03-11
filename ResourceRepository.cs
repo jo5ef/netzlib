@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using System.IO;
+using System.Web;
 
 namespace PimpMyWeb
 {
@@ -27,10 +29,8 @@ namespace PimpMyWeb
 		ReaderWriterLockSlim locks = new ReaderWriterLockSlim();
 		Dictionary<int, Resource> resources = new Dictionary<int, Resource>();
 
-		public void Add(Uri resourceUri)
+		public void AddInternal(int key, Action add)
 		{
-			var key = resourceUri.GetHashCode();
-
 			locks.EnterUpgradeableReadLock();
 			try
 			{
@@ -39,9 +39,7 @@ namespace PimpMyWeb
 					locks.EnterWriteLock();
 					try
 					{
-						var resource = new ExternalResource { Uri = resourceUri };
-						resources.Add(key, resource);
-						ExternalResourceFetcher.Fetch(resource);
+						add();
 					}
 					finally
 					{
@@ -53,69 +51,62 @@ namespace PimpMyWeb
 			{
 				locks.ExitUpgradeableReadLock();
 			}
+		}
+
+		public void Add(Uri resourceUri)
+		{
+			var key = resourceUri.GetHashCode();
+
+			AddInternal(key, () =>
+			{
+				FileInfo file;
+				ExternalResource resource;
+
+				if (resourceUri.TryMapPath(out file))
+				{
+					resource = new LocalResource(key) { File = file };
+					resource.Fetch();
+				}
+				else
+				{
+					resource = new RemoteResource { Uri = resourceUri };
+					resource.Fetch();
+				}
+
+				resources.Add(key, resource);
+			});
 		}
 
 		public void Add(string content)
 		{
 			var key = content.GetHashCode();
 
-			locks.EnterUpgradeableReadLock();
-			try
+			AddInternal(key, () =>
 			{
-				if (!resources.ContainsKey(key))
-				{
-					locks.EnterWriteLock();
-					try
-					{
-						resources.Add(key, new Resource { Content = content });
-					}
-					finally
-					{
-						locks.ExitWriteLock();
-					}
-				}
-			}
-			finally
-			{
-				locks.ExitUpgradeableReadLock();
-			}
+				resources.Add(key, new Resource { Content = content });
+			
+			});
 		}
 
 		public void Add(int key, int[] resourceList, ContentFilter filter)
 		{
-			locks.EnterUpgradeableReadLock();
-			try
+			AddInternal(key, () =>
 			{
-				if (!resources.ContainsKey(key))
+				var l = new List<Resource>();
+
+				foreach (var resourceKey in resourceList)
 				{
-					locks.EnterWriteLock();
-					try
+					if (!resources.ContainsKey(resourceKey))
 					{
-						var l = new List<Resource>();
-
-						foreach (var resourceKey in resourceList)
-						{
-							if (!resources.ContainsKey(resourceKey))
-							{
-								throw new InvalidOperationException(
-									"members of composite resources must be added to the repository first");
-							}
-
-							l.Add(resources[resourceKey]);
-						}
-
-						resources.Add(key, new CompositeResource { Resources = l.ToArray(), Filter = filter });
+						throw new InvalidOperationException(
+							"members of composite resources must be added to the repository first");
 					}
-					finally
-					{
-						locks.ExitWriteLock();
-					}
+
+					l.Add(resources[resourceKey]);
 				}
-			}
-			finally
-			{
-				locks.ExitUpgradeableReadLock();
-			}
+
+				resources.Add(key, new CompositeResource { Resources = l.ToArray(), Filter = filter });
+			});
 		}
 
 		public string GetContent(int key)
