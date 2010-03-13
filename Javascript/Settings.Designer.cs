@@ -8,12 +8,12 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace PimpMyWeb {
+namespace PimpMyWeb.Javascript {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "10.0.0.0")]
-    public sealed partial class Settings : global::System.Configuration.ApplicationSettingsBase {
+    internal sealed partial class Settings : global::System.Configuration.ApplicationSettingsBase {
         
         private static Settings defaultInstance = ((Settings)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new Settings())));
         
@@ -25,37 +25,55 @@ namespace PimpMyWeb {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("900")]
-        public int ExternalResourceRefreshInterval {
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool Enabled {
             get {
-                return ((int)(this["ExternalResourceRefreshInterval"]));
+                return ((bool)(this["Enabled"]));
             }
         }
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("10")]
-        public int ExternalResourceTimeout {
+        [global::System.Configuration.DefaultSettingValueAttribute("(?<tag><script[^>]*?javascript[^>]*?)(/>|>(?<src>(.|\\n)*?)</script>)")]
+        public string ScriptPattern {
             get {
-                return ((int)(this["ExternalResourceTimeout"]));
+                return ((string)(this["ScriptPattern"]));
             }
         }
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("86400")]
-        public int CombinedScriptCacheDuration {
+        [global::System.Configuration.DefaultSettingValueAttribute("src=\"(?<src>[^\"]*)\"")]
+        public string ExternalScriptPattern {
             get {
-                return ((int)(this["CombinedScriptCacheDuration"]));
+                return ((string)(this["ExternalScriptPattern"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute(" class=\"exclude\"")]
+        public string ExcludePattern {
+            get {
+                return ((string)(this["ExcludePattern"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("<script type=\"text/javascript\" src=\"script.axd?v={0}\"></script>")]
+        public string CombinedScriptTag {
+            get {
+                return ((string)(this["CombinedScriptTag"]));
             }
         }
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("True")]
-        public bool WatchFiles {
+        public bool Compression {
             get {
-                return ((bool)(this["WatchFiles"]));
+                return ((bool)(this["Compression"]));
             }
         }
     }

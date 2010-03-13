@@ -45,11 +45,16 @@
   <ItemGroup>
     <Compile Include="Extensions.cs" />
     <Compile Include="ExternalResourceFetcher.cs" />
+    <Compile Include="Javascript\JavascriptCombiner.cs" />
+    <Compile Include="Javascript\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
     <Compile Include="PimpMyWebModule.cs" />
     <Compile Include="ResourceRepository.cs" />
-    <Compile Include="Javascript\Combinator.cs" />
-    <Compile Include="Javascript\ScriptHandler.cs" />
-    <Compile Include="Javascript\ScriptTagFilter.cs" />
+    <Compile Include="ResourceHandler.cs" />
+    <Compile Include="TagFilter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Resource.cs" />
     <Compile Include="Settings.Designer.cs">
@@ -60,6 +65,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+    <None Include="Javascript\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
     <None Include="Settings.settings">
       <Generator>PublicSettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>

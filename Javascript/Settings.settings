@@ -1,0 +1,24 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="PimpMyWeb.Javascript" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="Enabled" Type="System.Boolean" Scope="Application">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="ScriptPattern" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">(?&lt;tag&gt;&lt;script[^&gt;]*?javascript[^&gt;]*?)(/&gt;|&gt;(?&lt;src&gt;(.|\n)*?)&lt;/script&gt;)</Value>
+    </Setting>
+    <Setting Name="ExternalScriptPattern" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">src="(?&lt;src&gt;[^"]*)"</Value>
+    </Setting>
+    <Setting Name="ExcludePattern" Type="System.String" Scope="Application">
+      <Value Profile="(Default)"> class="exclude"</Value>
+    </Setting>
+    <Setting Name="CombinedScriptTag" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">&lt;script type="text/javascript" src="script.axd?v={0}"&gt;&lt;/script&gt;</Value>
+    </Setting>
+    <Setting Name="Compression" Type="System.Boolean" Scope="Application">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>

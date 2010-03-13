@@ -6,9 +6,9 @@ using System.Web;
 using System.IO;
 using System.IO.Compression;
 
-namespace PimpMyWeb.Javascript
+namespace PimpMyWeb
 {
-	public class ScriptHandler : IHttpHandler
+	public class ResourceHandler : IHttpHandler
 	{
 		Settings settings = Settings.Default;
 

@@ -3,50 +3,29 @@ using System;
 using System.Text;
 using System.Web;
 using System.Text.RegularExpressions;
-namespace PimpMyWeb.Javascript
+using PimpMyWeb.Javascript;
+
+namespace PimpMyWeb
 {
-	/// <summary>
-	/// Filters Javascript (external and inline) from the output,
-	/// passes it on to a Combinator, and inserts a single combined
-	/// script reference just before the &lt;/body&gt; tag.
-	/// </summary>
-	public class ScriptTagFilter : Stream
+	internal class TagFilter : Stream
 	{
-		private static readonly Regex scriptPattern;
-		private static readonly Regex externalScriptPattern;
-		private static readonly Regex excludePattern;
-		private static readonly string combinedScriptHtml;
+		public delegate string TagFilterAction(string buffer, StreamWriter writer);
 
-		static ScriptTagFilter()
-		{
-			var settings = Settings.Default;
-			var patternOptions = RegexOptions.IgnoreCase | RegexOptions.Compiled;
-			scriptPattern = new Regex(settings.ScriptPattern, patternOptions);
-			externalScriptPattern = new Regex(settings.ExternalScriptPattern, patternOptions);
-			excludePattern = new Regex(settings.ExcludeScriptPattern, patternOptions);
-			combinedScriptHtml = settings.CombinedScriptHtml;
-		}
+		public event TagFilterAction Filter;
 
-		private readonly IScriptCombinator combinator;
-
-		private readonly Uri baseUri;
 		private readonly StreamWriter writer;
 		private readonly Encoding encoding;
 		private StringBuilder patternBuffer = new StringBuilder();
 
-		public ScriptTagFilter(IScriptCombinator combinator)
+		public TagFilter()
 			: this(
 				HttpContext.Current.Response.Filter,
-				HttpContext.Current.Response.ContentEncoding,
-				HttpContext.Current.Request.Url,
-				combinator) { }
+				HttpContext.Current.Response.ContentEncoding) { }
 
-		public ScriptTagFilter(Stream stream, Encoding encoding, Uri baseUri, IScriptCombinator combinator)
+		public TagFilter(Stream stream, Encoding encoding)
 		{
 			this.writer = new StreamWriter(stream, encoding);
 			this.encoding = encoding;
-			this.baseUri = baseUri;
-			this.combinator = combinator;
 		}
 
 		#region Not Supported
@@ -179,45 +158,21 @@ namespace PimpMyWeb.Javascript
 
 		private void EvaluatePatternBuffer()
 		{
-			var s = patternBuffer.ToString();
-			var afterLastMatch = 0;
-
-			foreach (Match m in scriptPattern.Matches(s))
+			if (Filter != null)
 			{
-				writer.Write(s.Substring(afterLastMatch, m.Index - afterLastMatch));
-				afterLastMatch = m.Index + m.Length;
+				var buffer = patternBuffer.ToString();
 
-				var script = m.Groups[0].Value;
-
-				var excludeMatch = excludePattern.Match(script);
-
-				if (excludeMatch.Success)
+				foreach (TagFilterAction filter in Filter.GetInvocationList())
 				{
-					writer.Write(script.Substring(0, excludeMatch.Index));
-					writer.Write(script.Substring(excludeMatch.Index + excludeMatch.Length));
-					continue;
+					buffer = filter(buffer, writer);
 				}
 
-				var srcMatch = externalScriptPattern.Match(m.Groups["tag"].Value);
-
-				if (srcMatch.Success)
-				{
-					combinator.Add(new Uri(baseUri, HttpUtility.HtmlDecode(srcMatch.Groups["src"].Value)));
-				}
-				else
-				{
-					combinator.Add(m.Groups["src"].Value);
-				}
+				patternBuffer = new StringBuilder(buffer);
 			}
-
-			var remainder = s.Substring(afterLastMatch);
-			patternBuffer = new StringBuilder(remainder);
-
-			var bodyIndex = remainder.IndexOf("</body>");
-			var combinedHash = combinator.Combine();
-			if (bodyIndex != -1 && combinedHash != null)
+			else
 			{
-				patternBuffer.Insert(bodyIndex, string.Format(combinedScriptHtml, combinedHash));
+				writer.Write(patternBuffer);
+				patternBuffer = new StringBuilder();
 			}
 		}
 	}

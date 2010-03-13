@@ -21,7 +21,16 @@ namespace PimpMyWeb
 
 		void context_BeginRequest(object sender, EventArgs e)
 		{
-			HttpContext.Current.Response.Filter = new ScriptTagFilter(new ScriptCombinator(resources));
+			var ctx = HttpContext.Current;
+
+			var tagFilter = new TagFilter();
+			ctx.Response.Filter = tagFilter;
+
+			if (Javascript.Settings.Default.Enabled)
+			{
+				var jsCombinator = new JavascriptCombiner(ctx.Request.Url, resources);
+				tagFilter.Filter += jsCombinator.Filter;
+			}
 		}
 
 		public void Dispose()
