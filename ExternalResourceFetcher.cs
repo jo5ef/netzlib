@@ -13,12 +13,6 @@ namespace PimpMyWeb
 {
 	internal class ExternalResourceFetcher
 	{
-		public static readonly ExternalResourceFetcher Current = new ExternalResourceFetcher();
-
-		private ExternalResourceFetcher()
-		{
-		}
-
 		public void Fetch(ExternalResource resource)
 		{
 			if (resource is LocalResource)
@@ -81,7 +75,7 @@ namespace PimpMyWeb
 					var dir = directories[file.DirectoryName];
 					if (dir.Resources.ContainsKey(file.Name))
 					{
-						dir.Resources[file.Name].Fetch();
+						Fetch(dir.Resources[file.Name]);
 					}
 				}
 			}
@@ -110,7 +104,7 @@ namespace PimpMyWeb
 			}
 		}
 
-		private static void ResponseCallback(IAsyncResult ar)
+		private void ResponseCallback(IAsyncResult ar)
 		{
 			var rs = ar.AsyncState as RequestState;
 
@@ -141,7 +135,7 @@ namespace PimpMyWeb
 			}
 		}
 
-		private static void TimeoutCallback(object state, bool timedOut)
+		private void TimeoutCallback(object state, bool timedOut)
 		{
 			if (timedOut)
 			{
@@ -153,7 +147,7 @@ namespace PimpMyWeb
 			}
 		}
 
-		private static void CacheRefetchItem(RemoteResource resource)
+		private void CacheRefetchItem(RemoteResource resource)
 		{
 			if (Settings.Default.ExternalResourceRefreshInterval > 0)
 			{
@@ -163,9 +157,9 @@ namespace PimpMyWeb
 			}
 		}
 
-		private static void Refetch(string key, object value, CacheItemRemovedReason reason)
+		private void Refetch(string key, object value, CacheItemRemovedReason reason)
 		{
-			(value as RemoteResource).Fetch();
+			Fetch(value as RemoteResource);
 		}
 
 		#endregion

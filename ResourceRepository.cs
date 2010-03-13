@@ -20,14 +20,10 @@ namespace PimpMyWeb
 
 	internal class ResourceRepository : IResourceRepository
 	{
-		public static readonly IResourceRepository Current = new ResourceRepository();
-		
-		private ResourceRepository()
-		{
-		}
-
 		ReaderWriterLockSlim locks = new ReaderWriterLockSlim();
 		Dictionary<int, Resource> resources = new Dictionary<int, Resource>();
+
+		ExternalResourceFetcher fetcher = new ExternalResourceFetcher();
 
 		public void AddInternal(int key, Action add)
 		{
@@ -65,12 +61,12 @@ namespace PimpMyWeb
 				if (resourceUri.TryMapPath(out file))
 				{
 					resource = new LocalResource(key) { File = file };
-					resource.Fetch();
+					fetcher.Fetch(resource);
 				}
 				else
 				{
 					resource = new RemoteResource { Uri = resourceUri };
-					resource.Fetch();
+					fetcher.Fetch(resource);
 				}
 
 				resources.Add(key, resource);

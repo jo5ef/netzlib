@@ -11,7 +11,6 @@ namespace PimpMyWeb.Javascript
 	public class ScriptHandler : IHttpHandler
 	{
 		Settings settings = Settings.Default;
-		IResourceRepository repository = ResourceRepository.Current;
 
 		public bool IsReusable
 		{
@@ -24,6 +23,12 @@ namespace PimpMyWeb.Javascript
 			if (!int.TryParse(ctx.Request["v"], out hash))
 			{
 				Throw404(ctx);
+			}
+
+			var repository = ctx.Application[PimpMyWebModule.RESOURCE_REPOSITORY] as IResourceRepository;
+			if (repository == null)
+			{
+				throw new InvalidOperationException("no repository registered");
 			}
 
 			var script = repository.GetContent(hash);

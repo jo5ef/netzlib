@@ -9,11 +9,6 @@ namespace PimpMyWeb
 {
 	internal static class Extensions
 	{
-		public static void Fetch(this ExternalResource resource)
-		{
-			ExternalResourceFetcher.Current.Fetch(resource);
-		}
-
 		public static bool TryMapPath(this Uri uri, out FileInfo file)
 		{
 			try

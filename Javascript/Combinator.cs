@@ -15,10 +15,15 @@ namespace PimpMyWeb.Javascript
 
 	internal class ScriptCombinator : IScriptCombinator
 	{
-		IResourceRepository repository = ResourceRepository.Current;
+		IResourceRepository repository;
 		int hash;
 		List<int> scripts = new List<int>();
-		
+
+		public ScriptCombinator(IResourceRepository repository)
+		{
+			this.repository = repository;
+		}
+
 		public void Add(Uri script)
 		{
 			repository.Add(script);

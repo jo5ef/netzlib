@@ -34,12 +34,12 @@ namespace PimpMyWeb.Javascript
 		private readonly Encoding encoding;
 		private StringBuilder patternBuffer = new StringBuilder();
 
-		public ScriptTagFilter()
+		public ScriptTagFilter(IScriptCombinator combinator)
 			: this(
 				HttpContext.Current.Response.Filter,
 				HttpContext.Current.Response.ContentEncoding,
 				HttpContext.Current.Request.Url,
-				new ScriptCombinator()) { }
+				combinator) { }
 
 		public ScriptTagFilter(Stream stream, Encoding encoding, Uri baseUri, IScriptCombinator combinator)
 		{
