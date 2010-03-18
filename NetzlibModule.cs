@@ -4,7 +4,7 @@ using netzlib.Javascript;
 
 namespace netzlib
 {
-	public class NetzLibHttpModule : IHttpModule
+	public class NetzlibModule : IHttpModule
 	{
 		internal static readonly string RESOURCE_REPOSITORY = typeof(IResourceRepository).FullName;
 

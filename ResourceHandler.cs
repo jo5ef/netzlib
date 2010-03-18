@@ -23,7 +23,7 @@ namespace netzlib
 				Throw404(ctx);
 			}
 
-			var repository = ctx.Application[NetzLibHttpModule.RESOURCE_REPOSITORY] as IResourceRepository;
+			var repository = ctx.Application[NetzlibModule.RESOURCE_REPOSITORY] as IResourceRepository;
 			if (repository == null)
 			{
 				throw new InvalidOperationException("no repository registered");
