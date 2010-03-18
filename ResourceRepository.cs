@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.IO;
-using System.Web;
 
-namespace PimpMyWeb
+namespace netzlib
 {
 	internal interface IResourceRepository
 	{
@@ -20,10 +17,10 @@ namespace PimpMyWeb
 
 	internal class ResourceRepository : IResourceRepository
 	{
-		ReaderWriterLockSlim locks = new ReaderWriterLockSlim();
-		Dictionary<int, Resource> resources = new Dictionary<int, Resource>();
+		readonly ReaderWriterLockSlim locks = new ReaderWriterLockSlim();
+		readonly Dictionary<int, Resource> resources = new Dictionary<int, Resource>();
 
-		ExternalResourceFetcher fetcher = new ExternalResourceFetcher();
+		readonly ExternalResourceFetcher fetcher = new ExternalResourceFetcher();
 
 		public void AddInternal(int key, Action add)
 		{

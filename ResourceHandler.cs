@@ -1,16 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Web;
 using System.IO;
 using System.IO.Compression;
 
-namespace PimpMyWeb
+namespace netzlib
 {
 	public class ResourceHandler : IHttpHandler
 	{
-		Settings settings = Settings.Default;
+		readonly Settings settings = Settings.Default;
 
 		public bool IsReusable
 		{
@@ -25,7 +23,7 @@ namespace PimpMyWeb
 				Throw404(ctx);
 			}
 
-			var repository = ctx.Application[PimpMyWebModule.RESOURCE_REPOSITORY] as IResourceRepository;
+			var repository = ctx.Application[NetzLibHttpModule.RESOURCE_REPOSITORY] as IResourceRepository;
 			if (repository == null)
 			{
 				throw new InvalidOperationException("no repository registered");

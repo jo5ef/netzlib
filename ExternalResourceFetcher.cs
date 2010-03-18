@@ -9,7 +9,7 @@ using System.Web;
 using System.Web.Caching;
 using System.Threading;
 
-namespace PimpMyWeb
+namespace netzlib
 {
 	internal class ExternalResourceFetcher
 	{
@@ -34,10 +34,12 @@ namespace PimpMyWeb
 		class WatchedDirectory
 		{
 			public FileSystemWatcher Watcher { get; set; }
-			public readonly Dictionary<string, LocalResource> Resources = new Dictionary<string, LocalResource>();
+			public readonly Dictionary<string, LocalResource> Resources =
+				new Dictionary<string, LocalResource>();
 		}
 
-		private Dictionary<string, WatchedDirectory> directories = new Dictionary<string, WatchedDirectory>();
+		private readonly Dictionary<string, WatchedDirectory> directories =
+			new Dictionary<string, WatchedDirectory>();
 
 		public void Fetch(LocalResource resource)
 		{

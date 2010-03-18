@@ -2,10 +2,8 @@
 using System;
 using System.Text;
 using System.Web;
-using System.Text.RegularExpressions;
-using PimpMyWeb.Javascript;
 
-namespace PimpMyWeb
+namespace netzlib
 {
 	internal class TagFilter : Stream
 	{

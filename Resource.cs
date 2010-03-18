@@ -1,21 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Threading;
 using System.IO;
 
-namespace PimpMyWeb
+namespace netzlib
 {
 	internal class Resource
 	{
 		public virtual string Content { get; set; }
 		public virtual int Key { get { return Content.GetHashCode(); } }
-
-		public override int GetHashCode()
-		{
-			return base.GetHashCode();
-		}
 	}
 
 	internal abstract class ExternalResource : Resource

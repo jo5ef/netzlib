@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.IO;
 using Yahoo.Yui.Compressor;
 using System.Web;
 
-namespace PimpMyWeb.Javascript
+namespace netzlib.Javascript
 {
 	internal class JavascriptCombiner
 	{
@@ -25,10 +23,10 @@ namespace PimpMyWeb.Javascript
 			excludePattern = new Regex(settings.ExcludePattern, patternOptions);
 		}
 
-		Uri baseUri;
-		IResourceRepository repository;
+		readonly Uri baseUri;
+		readonly IResourceRepository repository;
 		int hash;
-		List<int> scripts = new List<int>();
+		readonly List<int> scripts = new List<int>();
 
 		public JavascriptCombiner(Uri baseUri, IResourceRepository repository)
 		{
