@@ -13,93 +13,29 @@ namespace netzlib
 {
 	internal class ExternalResourceFetcher
 	{
-		public void Fetch(ExternalResource resource)
+		class RequestState
 		{
-			if (resource is LocalResource)
-			{
-				Fetch(resource as LocalResource);
-			}
-			else if (resource is RemoteResource)
-			{
-				Fetch(resource as RemoteResource);
-			}
-			else
-			{
-				throw new NotImplementedException();
-			}
+			public WebRequest Request { get; set; }
+			public ExternalResource Resource { get; set; }
 		}
-
-		#region local fetch
 
 		class WatchedDirectory
 		{
 			public FileSystemWatcher Watcher { get; set; }
-			public readonly Dictionary<string, LocalResource> Resources =
-				new Dictionary<string, LocalResource>();
+			public readonly Dictionary<string, ExternalResource> Resources =
+				new Dictionary<string, ExternalResource>();
 		}
 
 		private readonly Dictionary<string, WatchedDirectory> directories =
 			new Dictionary<string, WatchedDirectory>();
 
-		public void Fetch(LocalResource resource)
-		{
-			resource.Content = File.ReadAllText(resource.File.FullName);
-			resource.Loaded.Set();
-
-			if (Settings.Default.WatchFiles)
-			{
-				// setup file watch
-
-				if (!directories.ContainsKey(resource.File.DirectoryName))
-				{
-					var fsw = new FileSystemWatcher(resource.File.DirectoryName);
-					fsw.NotifyFilter = NotifyFilters.LastWrite;
-					fsw.Changed += new FileSystemEventHandler(OnFileChanged);
-					directories.Add(resource.File.DirectoryName, new WatchedDirectory { Watcher = fsw });
-				}
-
-				var dir = directories[resource.File.DirectoryName];
-				if (!dir.Resources.ContainsKey(resource.File.Name))
-				{
-					dir.Resources.Add(resource.File.Name, resource);
-					dir.Watcher.EnableRaisingEvents = true;
-				}
-			}
-		}
-
-		private void OnFileChanged(object sender, FileSystemEventArgs e)
-		{
-			if (e.ChangeType == WatcherChangeTypes.Changed)
-			{
-				var file = new FileInfo(e.FullPath);
-				if (directories.ContainsKey(file.DirectoryName))
-				{
-					var dir = directories[file.DirectoryName];
-					if (dir.Resources.ContainsKey(file.Name))
-					{
-						Fetch(dir.Resources[file.Name]);
-					}
-				}
-			}
-		}
-
-		#endregion
-
-		#region remote fetch
-
-		class RequestState
-		{
-			public WebRequest Request { get; set; }
-			public RemoteResource Resource { get; set; }
-		}
-
-		public void Fetch(RemoteResource resource)
+		public void Fetch(ExternalResource resource)
 		{
 			if (resource != null)
 			{
 				var wr = WebRequest.Create(resource.Uri);
 				var rs = new RequestState { Request = wr, Resource = resource };
-				var ar = wr.BeginGetResponse(new AsyncCallback(ResponseCallback), rs);
+				var ar = wr.BeginGetResponse(ResponseCallback, rs);
  
 				ThreadPool.RegisterWaitForSingleObject(ar.AsyncWaitHandle, TimeoutCallback,
 					rs, Settings.Default.ExternalResourceTimeout * 1000, true);
@@ -126,14 +62,13 @@ namespace netzlib
 					rs.Resource.Content = reader.ReadToEnd();
 				}
 			}
-			catch (WebException ex)
+			catch (Exception ex)
 			{
 				rs.Resource.Content = string.Format("// {0}: {1}", rs.Request.RequestUri, ex.Message);
 			}
 			finally
 			{
-				rs.Resource.Loaded.Set();
-				CacheRefetchItem(rs.Resource);
+				CompleteFetch(rs.Resource);
 			}
 		}
 
@@ -144,26 +79,70 @@ namespace netzlib
 				var rs = state as RequestState;
 				rs.Request.Abort();
 				rs.Resource.Content = string.Format("// {0}: timed out", rs.Resource.Uri);
-				rs.Resource.Loaded.Set();
-				CacheRefetchItem(rs.Resource);
+				CompleteFetch(rs.Resource);
 			}
 		}
 
-		private void CacheRefetchItem(RemoteResource resource)
+		private void CompleteFetch(ExternalResource resource)
 		{
-			if (Settings.Default.ExternalResourceRefreshInterval > 0)
+			resource.Loaded.Set();
+
+			if(resource.Uri.IsFile)
 			{
-				HttpRuntime.Cache.Add(Guid.NewGuid().ToString(), resource, null,
-					DateTime.Now.AddSeconds(Settings.Default.ExternalResourceRefreshInterval),
-					Cache.NoSlidingExpiration, CacheItemPriority.Default, Refetch);
+				// resource is a local file, setup a file watch
+
+				if (Settings.Default.WatchFiles)
+				{
+					var file = new FileInfo(resource.Uri.LocalPath);
+
+					if (!directories.ContainsKey(file.DirectoryName))
+					{
+						var fsw = new FileSystemWatcher(file.DirectoryName);
+						fsw.NotifyFilter = NotifyFilters.LastWrite;
+						fsw.Changed += OnFileChanged;
+						directories.Add(file.DirectoryName, new WatchedDirectory { Watcher = fsw });
+					}
+
+					var dir = directories[file.DirectoryName];
+					if (!dir.Resources.ContainsKey(file.Name))
+					{
+						dir.Resources.Add(file.Name, resource);
+						dir.Watcher.EnableRaisingEvents = true;
+					}
+				}
+			}
+			else
+			{
+				// resource is a remote url, schedule a refetch
+
+				if (Settings.Default.ExternalResourceRefreshInterval > 0)
+				{
+					HttpRuntime.Cache.Add(Guid.NewGuid().ToString(), resource, null,
+						DateTime.Now.AddSeconds(Settings.Default.ExternalResourceRefreshInterval),
+						Cache.NoSlidingExpiration, CacheItemPriority.Default, Refetch);
+				}
 			}
 		}
 
 		private void Refetch(string key, object value, CacheItemRemovedReason reason)
 		{
-			Fetch(value as RemoteResource);
+			Fetch(value as ExternalResource);
 		}
 
-		#endregion
+		private void OnFileChanged(object sender, FileSystemEventArgs e)
+		{
+			if (e.ChangeType == WatcherChangeTypes.Changed)
+			{
+				var file = new FileInfo(e.FullPath);
+				if (directories.ContainsKey(file.DirectoryName))
+				{
+					var dir = directories[file.DirectoryName];
+					if (dir.Resources.ContainsKey(file.Name))
+					{
+						Fetch(dir.Resources[file.Name]);
+					}
+				}
+			}
+		}
 	}
 }

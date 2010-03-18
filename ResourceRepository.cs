@@ -54,31 +54,25 @@ namespace netzlib
 			{
 				FileInfo file;
 				ExternalResource resource;
-
+				
 				if (resourceUri.TryMapPath(out file))
 				{
-					resource = new LocalResource(key) { File = file };
-					fetcher.Fetch(resource);
+					resource = new ExternalResource { Uri = new Uri(file.FullName) };
 				}
 				else
 				{
-					resource = new RemoteResource { Uri = resourceUri };
-					fetcher.Fetch(resource);
+					resource = new ExternalResource { Uri = resourceUri };
 				}
 
 				resources.Add(key, resource);
+				fetcher.Fetch(resource);
 			});
 		}
 
 		public void Add(string content)
 		{
 			var key = content.GetHashCode();
-
-			AddInternal(key, () =>
-			{
-				resources.Add(key, new Resource { Content = content });
-			
-			});
+			AddInternal(key, () => resources.Add(key, new Resource { Content = content }));
 		}
 
 		public void Add(int key, int[] resourceList, ContentFilter filter)

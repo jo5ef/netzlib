@@ -11,28 +11,10 @@ namespace netzlib
 		public virtual int Key { get { return Content.GetHashCode(); } }
 	}
 
-	internal abstract class ExternalResource : Resource
+	internal class ExternalResource : Resource
 	{
 		public readonly ManualResetEvent Loaded = new ManualResetEvent(false);
-	}
-
-	internal class LocalResource : ExternalResource
-	{
-		private readonly int key;
-
-		public LocalResource(int key)
-		{
-			this.key = key;
-		}
-
-		public FileInfo File { get; set; }
-		public override int Key { get { return key; } }
-	}
-
-	internal class RemoteResource : ExternalResource
-	{
 		public Uri Uri { get; set; }
-		public override int Key { get { return Uri.GetHashCode(); } }
 	}
 
 	internal class CompositeResource : Resource
