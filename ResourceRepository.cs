@@ -22,30 +22,6 @@ namespace netzlib
 
 		readonly ExternalResourceFetcher fetcher = new ExternalResourceFetcher();
 
-		public void AddInternal(int key, Action add)
-		{
-			locks.EnterUpgradeableReadLock();
-			try
-			{
-				if (!resources.ContainsKey(key))
-				{
-					locks.EnterWriteLock();
-					try
-					{
-						add();
-					}
-					finally
-					{
-						locks.ExitWriteLock();
-					}
-				}
-			}
-			finally
-			{
-				locks.ExitUpgradeableReadLock();
-			}
-		}
-
 		public void Add(Uri resourceUri)
 		{
 			var key = resourceUri.GetHashCode();
@@ -94,6 +70,30 @@ namespace netzlib
 
 				resources.Add(key, new CompositeResource { Resources = l.ToArray(), Filter = filter });
 			});
+		}
+
+		public void AddInternal(int key, Action add)
+		{
+			locks.EnterUpgradeableReadLock();
+			try
+			{
+				if (!resources.ContainsKey(key))
+				{
+					locks.EnterWriteLock();
+					try
+					{
+						add();
+					}
+					finally
+					{
+						locks.ExitWriteLock();
+					}
+				}
+			}
+			finally
+			{
+				locks.ExitUpgradeableReadLock();
+			}
 		}
 
 		public string GetContent(int key)

@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Net;
 using System.IO.Compression;
 using System.IO;
@@ -93,22 +91,7 @@ namespace netzlib
 
 				if (Settings.Default.WatchFiles)
 				{
-					var file = new FileInfo(resource.Uri.LocalPath);
-
-					if (!directories.ContainsKey(file.DirectoryName))
-					{
-						var fsw = new FileSystemWatcher(file.DirectoryName);
-						fsw.NotifyFilter = NotifyFilters.LastWrite;
-						fsw.Changed += OnFileChanged;
-						directories.Add(file.DirectoryName, new WatchedDirectory { Watcher = fsw });
-					}
-
-					var dir = directories[file.DirectoryName];
-					if (!dir.Resources.ContainsKey(file.Name))
-					{
-						dir.Resources.Add(file.Name, resource);
-						dir.Watcher.EnableRaisingEvents = true;
-					}
+					WatchFile(resource);
 				}
 			}
 			else
@@ -120,6 +103,28 @@ namespace netzlib
 					HttpRuntime.Cache.Add(Guid.NewGuid().ToString(), resource, null,
 						DateTime.Now.AddSeconds(Settings.Default.ExternalResourceRefreshInterval),
 						Cache.NoSlidingExpiration, CacheItemPriority.Default, Refetch);
+				}
+			}
+		}
+
+		private void WatchFile(ExternalResource resource)
+		{
+			var file = new FileInfo(resource.Uri.LocalPath);
+			lock (directories)
+			{
+				if (!directories.ContainsKey(file.DirectoryName))
+				{
+					var fsw = new FileSystemWatcher(file.DirectoryName);
+					fsw.NotifyFilter = NotifyFilters.LastWrite;
+					fsw.Changed += OnFileChanged;
+					directories.Add(file.DirectoryName, new WatchedDirectory { Watcher = fsw });
+				}
+
+				var dir = directories[file.DirectoryName];
+				if (!dir.Resources.ContainsKey(file.Name))
+				{
+					dir.Resources.Add(file.Name, resource);
+					dir.Watcher.EnableRaisingEvents = true;
 				}
 			}
 		}
