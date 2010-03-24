@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Web;
+using System.Web.UI;
 using netzlib.Javascript;
 
 namespace netzlib
@@ -13,20 +14,24 @@ namespace netzlib
 		public void Init(HttpApplication context)
 		{
 			context.Application[RESOURCE_REPOSITORY] = resources;
-			context.BeginRequest += context_BeginRequest;
+			context.PostMapRequestHandler += OnPostMapRequestHandler;
 		}
 
-		static void context_BeginRequest(object sender, EventArgs e)
+		static void OnPostMapRequestHandler(object sender, EventArgs e)
 		{
 			var ctx = HttpContext.Current;
-
-			var tagFilter = new TagFilter();
-			ctx.Response.Filter = tagFilter;
-
-			if (Javascript.Settings.Default.Enabled)
+			if(ctx != null && ctx.CurrentHandler is Page)
 			{
-				var jsCombinator = new JavascriptCombiner(ctx.Request.Url, resources);
-				tagFilter.Filter += jsCombinator.Filter;
+				var tagFilter = new TagFilter();
+				ctx.Response.Filter = tagFilter;
+
+
+
+				if (Javascript.Settings.Default.Enabled)
+				{
+					var jsCombinator = new JavascriptCombiner(ctx.Request.Url, resources);
+					tagFilter.Filter += jsCombinator.Filter;
+				}
 			}
 		}
 
