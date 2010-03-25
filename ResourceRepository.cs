@@ -9,8 +9,8 @@ namespace netzlib
 	{
 		void Add(Uri resource);
 		void Add(string resource);
-		void Add(int key, int[] resources, ContentFilter filter);
-		string GetContent(int key);
+		void Add(uint key, uint[] resources, ContentFilter filter);
+		string GetContent(uint key);
 	}
 
 	internal delegate string ContentFilter(string content);
@@ -18,13 +18,13 @@ namespace netzlib
 	internal class ResourceRepository : IResourceRepository
 	{
 		readonly ReaderWriterLockSlim locks = new ReaderWriterLockSlim();
-		readonly Dictionary<int, Resource> resources = new Dictionary<int, Resource>();
+		readonly Dictionary<uint, Resource> resources = new Dictionary<uint, Resource>();
 
 		readonly ExternalResourceFetcher fetcher = new ExternalResourceFetcher();
 
 		public void Add(Uri resourceUri)
 		{
-			var key = resourceUri.GetHashCode();
+			var key = resourceUri.GetKey();
 
 			AddInternal(key, () =>
 			{
@@ -47,11 +47,11 @@ namespace netzlib
 
 		public void Add(string content)
 		{
-			var key = content.GetHashCode();
+			var key = content.GetKey();
 			AddInternal(key, () => resources.Add(key, new Resource { Content = content }));
 		}
 
-		public void Add(int key, int[] resourceList, ContentFilter filter)
+		public void Add(uint key, uint[] resourceList, ContentFilter filter)
 		{
 			AddInternal(key, () =>
 			{
@@ -72,7 +72,7 @@ namespace netzlib
 			});
 		}
 
-		public void AddInternal(int key, Action add)
+		public void AddInternal(uint key, Action add)
 		{
 			locks.EnterUpgradeableReadLock();
 			try
@@ -96,7 +96,7 @@ namespace netzlib
 			}
 		}
 
-		public string GetContent(int key)
+		public string GetContent(uint key)
 		{
 			locks.EnterReadLock();
 			try

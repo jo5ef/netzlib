@@ -61,7 +61,7 @@ namespace netzlib.Javascript {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("<script type=\"text/javascript\" src=\"res.axd?v={0}\"></script>")]
+        [global::System.Configuration.DefaultSettingValueAttribute("<script type=\"text/javascript\" src=\"r.axd?v={0:x}\"></script>")]
         public string CombinedScriptTag {
             get {
                 return ((string)(this["CombinedScriptTag"]));

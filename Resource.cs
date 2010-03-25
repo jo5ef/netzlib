@@ -8,7 +8,6 @@ namespace netzlib
 	internal class Resource
 	{
 		public virtual string Content { get; set; }
-		public virtual int Key { get { return Content.GetHashCode(); } }
 	}
 
 	internal class ExternalResource : Resource
@@ -50,19 +49,6 @@ namespace netzlib
 			set
 			{
 				throw new InvalidOperationException();
-			}
-		}
-
-		public override int Key
-		{
-			get
-			{
-				int key = 0;
-				foreach (var r in Resources)
-				{
-					key ^= r.Key;
-				}
-				return key;
 			}
 		}
 	}

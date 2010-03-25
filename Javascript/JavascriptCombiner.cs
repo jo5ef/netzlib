@@ -25,8 +25,8 @@ namespace netzlib.Javascript
 
 		readonly Uri baseUri;
 		readonly IResourceRepository repository;
-		int hash;
-		readonly List<int> scripts = new List<int>();
+		uint hash;
+		readonly List<uint> scripts = new List<uint>();
 
 		public JavascriptCombiner(Uri baseUri, IResourceRepository repository)
 		{
@@ -36,19 +36,23 @@ namespace netzlib.Javascript
 
 		private void Add(Uri script)
 		{
+			var key = script.GetKey();
+			
 			repository.Add(script);
-			scripts.Add(script.GetHashCode());
-			hash ^= script.GetHashCode();
+			scripts.Add(key);
+			hash ^= key;
 		}
 
 		private void Add(string script)
 		{
+			var key = script.GetKey();
+
 			repository.Add(script);
-			scripts.Add(script.GetHashCode());
-			hash ^= script.GetHashCode();
+			scripts.Add(key);
+			hash ^= key;
 		}
 		 
-		private int Combine()
+		private uint Combine()
 		{
 			if (Settings.Default.Compression)
 			{

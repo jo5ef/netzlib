@@ -15,7 +15,7 @@
       <Value Profile="(Default)"> class="exclude"</Value>
     </Setting>
     <Setting Name="CombinedScriptTag" Type="System.String" Scope="Application">
-      <Value Profile="(Default)">&lt;script type="text/javascript" src="res.axd?v={0}"&gt;&lt;/script&gt;</Value>
+      <Value Profile="(Default)">&lt;script type="text/javascript" src="r.axd?v={0:x}"&gt;&lt;/script&gt;</Value>
     </Setting>
     <Setting Name="Compression" Type="System.Boolean" Scope="Application">
       <Value Profile="(Default)">True</Value>

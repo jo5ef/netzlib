@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.Text;
 using System.Web;
 using System.IO;
@@ -17,8 +18,9 @@ namespace netzlib
 
 		public void ProcessRequest(HttpContext ctx)
 		{
-			int hash;
-			if (!int.TryParse(ctx.Request["v"], out hash))
+			uint hash;
+			if (!uint.TryParse(ctx.Request["v"],
+				NumberStyles.HexNumber, CultureInfo.CurrentCulture, out hash))
 			{
 				Throw404(ctx);
 			}

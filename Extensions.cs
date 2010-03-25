@@ -6,6 +6,16 @@ namespace netzlib
 {
 	internal static class Extensions
 	{
+		public static uint GetKey(this Uri uri)
+		{
+			return (uint) uri.GetHashCode();
+		}
+
+		public static uint GetKey(this string s)
+		{
+			return (uint) s.GetHashCode();
+		}
+
 		public static bool TryMapPath(this Uri uri, out FileInfo file)
 		{
 			try
