@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.IO;
 using Yahoo.Yui.Compressor;
@@ -56,7 +58,9 @@ namespace netzlib.Javascript
 		{
 			if (Settings.Default.Compression)
 			{
-				repository.Add(hash, scripts.ToArray(), JavaScriptCompressor.Compress);
+				repository.Add(hash, scripts.ToArray(), s =>
+					JavaScriptCompressor.Compress(s, false, false, false,
+						false, 120, Encoding.UTF8, CultureInfo.CurrentCulture));
 			}
 			else
 			{
